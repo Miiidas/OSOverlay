@@ -1,0 +1,237 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style>
+
+        /*
+            表示設定 (1)
+        */
+
+        * {
+            /* フォント （一部のフォントは上手く適用されない） */
+            font-family: "Meiryo";
+            font-size: 12px;
+        }
+
+        body, html {
+            margin: 0;
+        }
+
+        html {
+            height: 100%;
+
+            /* 外枠 */
+            /*border: 1px solid rgba(0,0,0,0.1);*/
+            
+            /* はみ出た内容はスクロールバーを表示させずに隠す
+             * 今のところ、ブラウザへの入力はできないので表示させても無意味 */
+            overflow: hidden;
+            
+            /* 背景色 */
+            background-color: transparent;
+        }
+
+        .resizeHandle {
+            /* リサイズ用のハンドル
+             * リサイズができる場所はウィンドウ右下の16x16ピクセルの場所
+             * この部分が完全に透明だとマウス入力が透過してしまってサイズを変更できなくなる */
+            background-image: url(handle.png);
+            background-position: bottom right;
+            background-repeat: no-repeat;
+            box-sizing: border-box;
+        }
+
+
+
+        /* エンカウント情報とテーブルヘッダ内のテキストの設定 */
+        #encounter,
+        #combatantTableHeader * {
+            color: #DED7BE;
+            text-shadow: -1px 0 2px #795516, 0 1px 2px #795516, 1px 0 2px #795516, 0 -1px 2px #795516;
+            font-weight: 300;
+            white-space: nowrap;
+        }
+
+        /* テーブルヘッダの下線の設定 */
+        #combatantTableHeader tr {
+            border-bottom: 1px solid #DED7BE;
+        }
+
+    </style>
+    <script src="https://ngld.github.io/OverlayPlugin/assets/shared/common.min.js"></script>
+    <script>
+
+        //
+        // プラグイン側から以下のような ActXiv オブジェクトとしてデータが提供される
+        //
+        // var ActXiv = {
+        //    "Encounter": {...},
+        //    "Combatant": {
+        //        "PlayerName1": {...},
+        //        "PlayerName2": {...},
+        //        ...
+        //    }
+        // };
+        //
+        // データの更新は 1 秒毎。
+        // 
+        // プラグインから onOverlayDataUpdate イベントが発行されるので、それを受信することもできる
+        // イベントハンドラの第一引数の detail プロパティ内に上記のオブジェクトが入る
+        //
+
+        //
+        // 表示設定 (2)
+        //
+
+        // エンカウント情報の定義
+        var encounterDefine = "{duration}";
+
+        // 上記のエンカウント情報を HTML として扱うなら true
+        var useHTMLEncounterDefine = false;
+
+        // ヘッダの定義
+        var headerDefine =[];
+
+        // 表示するデータの定義
+        var bodyDefine =[];
+
+        // タイマー用関数、setIntervalが動いているかどうかのフラグ管理
+        var timecount = 0;
+        var isintervalrunning = false;
+        var timeA = 0;
+        var timeB = 0;
+        var textA = '00';
+        var textB = '00';
+        var timeRes = 0;
+        var timeRaw = 0;
+
+        //
+        // 以下表示用スクリプト
+        //
+
+        // CombatData イベントを購読
+        addOverlayListener("CombatData", (e) => update(e));
+        startOverlayEvents();
+
+        // 表示要素の更新
+        function update(data) {
+            updateEncounter(data);
+        }
+
+        // エンカウント情報を更新する
+        function updateEncounter(data) {
+            // 要素取得
+            var encounterElem = document.getElementById('encounter');
+
+            // テキスト取得
+            var elementText;
+            if (typeof encounterDefine === 'function') {
+                elementText = encounterDefine(data.Encounter);
+                if (typeof f !== 'string') {
+                    console.log("updateEncounter: 'encounterDefine' is declared as function but not returns a value as string.");
+                    return;
+                }
+            } else if (typeof encounterDefine === 'string') {
+                elementText = parseActFormat(encounterDefine, data.Encounter);
+            } else {
+                console.log("updateEncounter: 'encounterDefine' should be string or function that returns string.");
+                return;
+            }
+
+            // テキスト設定
+
+            //かきたし
+            //console.log(document.getElementById('encounter').outerHTML);
+
+            if (parseActFormat(elementText, data.Encounter) == '00:00') {
+                isintervalrunning = true;
+                timeRaw = 0;
+                timeRes = 0;
+                timeA = 0;
+                timeB = 0;
+            } else {
+                updateTimer();
+            }
+            
+            
+        }
+
+        var updateTimer = function(){
+            timeRaw = timeRaw + 0.1;
+            timeRes = Math.floor(timeRaw);
+            timeA = timeRes % 60
+            timeB = Math.floor(timeRes / 60);
+            if(timeA <= 9) {
+                textA = '0' + timeA;
+            } else {
+                textA = timeA;
+            }
+
+            if(timeB <= 9) {
+                textB = '0' + timeB;
+            } else {
+                textB = timeB;
+            }
+            encounter.innerText = textB + ':' + textA;
+            console.log(timeRaw);
+        }
+
+
+        timeRaw = setInterval(updateTimer, 100);
+        //かきたしおわり
+
+
+
+
+        // Miniparse フォーマット文字列を解析し、表示文字列を取得する
+        function parseActFormat(str, dictionary)
+        {
+            var result = "";
+
+            var currentIndex = 0;
+            do {
+                var openBraceIndex = str.indexOf('{', currentIndex);
+                if (openBraceIndex < 0) {
+                    result += str.slice(currentIndex);
+                    break;
+                }
+                else {
+                    result += str.slice(currentIndex, openBraceIndex);
+                    var closeBraceIndex = str.indexOf('}', openBraceIndex);
+                    if (closeBraceIndex < 0) {
+                        // parse error!
+                        console.log("parseActFormat: Parse error: missing close-brace for " + openBraceIndex.toString() + ".");
+                        return "ERROR";
+                    }
+                    else {
+                        var tag = str.slice(openBraceIndex + 1, closeBraceIndex);
+                        if (typeof dictionary[tag] !== 'undefined') {
+                            result += dictionary[tag];
+                        } else {
+                            console.log("parseActFormat: Unknown tag: " + tag);
+                            result += "ERROR";
+                        }
+                        currentIndex = closeBraceIndex + 1;
+                    }
+                }
+            } while (currentIndex < str.length);
+            
+            return result;
+        }
+
+    </script>
+</head>
+<body>
+    <div id="encounter">
+        00:00
+        <!-- ここにエンカウント情報が入る -->
+    </div>
+
+    <table id="combatantTable">
+        <!-- ここにヘッダが入る -->
+        <!-- ここに各キャラの情報が入る -->
+    </table>
+
+</body>
+</html>
