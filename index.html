@@ -11,7 +11,7 @@
         * {
             /* フォント （一部のフォントは上手く適用されない） */
             font-family: "Meiryo";
-            font-size: 12px;
+            font-size: 64px;
         }
 
         body, html {
@@ -32,14 +32,24 @@
             background-color: transparent;
         }
 
-        .resizeHandle {
-            /* リサイズ用のハンドル
-             * リサイズができる場所はウィンドウ右下の16x16ピクセルの場所
-             * この部分が完全に透明だとマウス入力が透過してしまってサイズを変更できなくなる */
-            background-image: url(handle.png);
-            background-position: bottom right;
-            background-repeat: no-repeat;
-            box-sizing: border-box;
+        #change_color {
+        float: right;
+        text-align: right;
+        width: 32px;
+        height: 32px;
+        position: absolute;
+        top:20px;
+        left:200px;
+        }
+
+        #hide_show {
+        float: right;
+        text-align: right;
+        width: 32px;
+        height: 32px;
+        position: absolute;
+        top:20px;
+        left:237px;
         }
 
 
@@ -47,12 +57,12 @@
         /* エンカウント情報とテーブルヘッダ内のテキストの設定 */
         #encounter,
         #combatantTableHeader * {
-            color: #DED7BE;
-            text-shadow: -1px 0 2px #795516, 0 1px 2px #795516, 1px 0 2px #795516, 0 -1px 2px #795516;
-            font-weight: 300;
-            white-space: nowrap;
+            color: #EBCA1B;
+            text-shadow: -1px 0 5px #000000, 0 1px 5px #000000, 1px 0 5px #000000, 0 -1px 5px #000000;
             text-align: center;
-            vertical-align: middle;
+            height:70px;
+            width:200px;
+            position:relative;
         }
 
         /* テーブルヘッダの下線の設定 */
@@ -222,6 +232,33 @@
             return result;
         }
 
+        //かきたし2
+        function hideelements(){
+            var togglebutton = document.getElementById('hide_show');
+            var encounterrr = document.getElementById("encounter");
+            if(togglebutton.getAttribute('src') == "eye_close.png"){//出す処理
+                encounterrr.style.visibility = "visible";
+                togglebutton.setAttribute('src', 'eye_open.png');
+            } else {//隠す処理
+                encounterrr.style.visibility = "hidden";
+                togglebutton.setAttribute('src', 'eye_close.png');
+            }
+        }
+
+        function changecolor(){//黄色->白->水色
+            var encounterrr = document.getElementById("encounter");
+            if(document.getElementById("encounter").style.color == "rgb(255, 255, 255)"){//白
+                console.log(document.getElementById("encounter").style.color);
+                document.getElementById("encounter").style.color = "#14C0F2";
+            } else if(document.getElementById("encounter").style.color == "rgb(20, 192, 242)"){//水色
+                console.log(document.getElementById("encounter").style.color);
+                document.getElementById("encounter").style.color = "#EBCA1B";
+            } else {//黄色
+                document.getElementById("encounter").style.color = "rgb(255, 255, 255)";
+                console.log(document.getElementById("encounter").style.color);
+            }
+        }
+
     </script>
 </head>
 <body>
@@ -230,10 +267,13 @@
         <!-- ここにエンカウント情報が入る -->
     </div>
 
-    <table id="combatantTable">
-        <!-- ここにヘッダが入る -->
-        <!-- ここに各キャラの情報が入る -->
-    </table>
+    <div id="change_color" onclick="changecolor()">
+        <img src="paint_bucket.png"/>
+    </div>
+    
+    <div id="hide_show" onclick="hideelements()">
+        <img src="eye_open.png"/>
+    </div>
 
 </body>
 </html>
