@@ -174,7 +174,7 @@
                 textB = timeB;
             }
             encounter.innerText = textB + ':' + textA;
-            console.log(timeRaw);
+            //console.log(timeRaw);
         }
 
 
