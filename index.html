@@ -123,21 +123,16 @@
         // 表示要素の更新
         function update(data) {
             if (JSON.stringify(data).search('0039..戦闘開始！') !== -1) {//戦闘開始
-                console.log('戦闘開始！');
                 timeRaw = 0;
                 currentTime = "00:00";
                 isTimerActive = true;
             } else if (JSON.stringify(data).search('/\|40000010\|/') !== -1) {//ワイプ(1)
-                console.log('タイマー停止');
                 isTimerActive = false;
             } else if (JSON.stringify(data).search('/\|40000005\|/') !== -1) {//ワイプ(2)
-                console.log('タイマー停止');
                 isTimerActive = false;
             } else if (JSON.stringify(data).search('/\|40000003\|/') !== -1) {//勝利(?)
-                console.log('タイマー停止');
                 isTimerActive = false;
             } else if (JSON.stringify(data).search('がレディチェックを開始しました。') !== -1) {//レディチェック
-                console.log('タイマー停止');
                 isTimerActive = false;
             } else {
                 
@@ -198,14 +193,11 @@
         function changecolor(){//黄色->白->水色
             var encounterrr = document.getElementById("encounter");
             if(document.getElementById("encounter").style.color == "rgb(255, 255, 255)"){//白
-                console.log(document.getElementById("encounter").style.color);
                 document.getElementById("encounter").style.color = "#14C0F2";
             } else if(document.getElementById("encounter").style.color == "rgb(20, 192, 242)"){//水色
-                console.log(document.getElementById("encounter").style.color);
                 document.getElementById("encounter").style.color = "#EBCA1B";
             } else {//黄色
                 document.getElementById("encounter").style.color = "rgb(255, 255, 255)";
-                console.log(document.getElementById("encounter").style.color);
             }
         }
 
