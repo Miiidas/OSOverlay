@@ -52,6 +52,15 @@
         left:237px;
         }
 
+        #end_encounter {
+        float: right;
+        text-align: right;
+        width: 32px;
+        height: 32px;
+        position: absolute;
+        top:57px;
+        left:200px;
+        }
 
 
         /* エンカウント情報とテーブルヘッダ内のテキストの設定 */
@@ -72,191 +81,8 @@
 
     </style>
     <script src="https://ngld.github.io/OverlayPlugin/assets/shared/common.min.js"></script>
-    <script>
+    <script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
 
-        //
-        // プラグイン側から以下のような ActXiv オブジェクトとしてデータが提供される
-        //
-        // var ActXiv = {
-        //    "Encounter": {...},
-        //    "Combatant": {
-        //        "PlayerName1": {...},
-        //        "PlayerName2": {...},
-        //        ...
-        //    }
-        // };
-        //
-        // データの更新は 1 秒毎。
-        // 
-        // プラグインから onOverlayDataUpdate イベントが発行されるので、それを受信することもできる
-        // イベントハンドラの第一引数の detail プロパティ内に上記のオブジェクトが入る
-        //
-
-        //
-        // 表示設定 (2)
-        //
-
-        // エンカウント情報の定義
-        var encounterDefine = "{duration}";
-
-        // 上記のエンカウント情報を HTML として扱うなら true
-        var useHTMLEncounterDefine = false;
-
-        // ヘッダの定義
-        var headerDefine =[];
-
-        // 表示するデータの定義
-        var bodyDefine =[];
-
-        // タイマー用関数、setIntervalが動いているかどうかのフラグ管理
-        var timecount = 0;
-        var isintervalrunning = false;
-        var timeA = 0;
-        var timeB = 0;
-        var textA = '00';
-        var textB = '00';
-        var timeRes = 0;
-        var timeRaw = 0;
-
-        //
-        // 以下表示用スクリプト
-        //
-
-        // CombatData イベントを購読
-        addOverlayListener("CombatData", (e) => update(e));
-        startOverlayEvents();
-
-        // 表示要素の更新
-        function update(data) {
-            updateEncounter(data);
-        }
-
-        // エンカウント情報を更新する
-        function updateEncounter(data) {
-            // 要素取得
-            var encounterElem = document.getElementById('encounter');
-
-            // テキスト取得
-            var elementText;
-            if (typeof encounterDefine === 'function') {
-                elementText = encounterDefine(data.Encounter);
-                if (typeof f !== 'string') {
-                    console.log("updateEncounter: 'encounterDefine' is declared as function but not returns a value as string.");
-                    return;
-                }
-            } else if (typeof encounterDefine === 'string') {
-                elementText = parseActFormat(encounterDefine, data.Encounter);
-            } else {
-                console.log("updateEncounter: 'encounterDefine' should be string or function that returns string.");
-                return;
-            }
-
-            // テキスト設定
-
-            //かきたし
-            //console.log(document.getElementById('encounter').outerHTML);
-
-            if (parseActFormat(elementText, data.Encounter) == '00:00') {
-                isintervalrunning = true;
-                timeRaw = 0;
-                timeRes = 0;
-                timeA = 0;
-                timeB = 0;
-            } else {
-                updateTimer();
-            }
-            
-            
-        }
-
-        var updateTimer = function(){
-            timeRaw = timeRaw + 0.1;
-            timeRes = Math.floor(timeRaw);
-            timeA = timeRes % 60
-            timeB = Math.floor(timeRes / 60);
-            if(timeA <= 9) {
-                textA = '0' + timeA;
-            } else {
-                textA = timeA;
-            }
-
-            if(timeB <= 9) {
-                textB = '0' + timeB;
-            } else {
-                textB = timeB;
-            }
-            encounter.innerText = textB + ':' + textA;
-            //console.log(timeRaw);
-        }
-
-
-        timeRaw = setInterval(updateTimer, 100);
-        //かきたしおわり
-
-
-
-
-        // Miniparse フォーマット文字列を解析し、表示文字列を取得する
-        function parseActFormat(str, dictionary)
-        {
-            var result = "";
-
-            var currentIndex = 0;
-            do {
-                var openBraceIndex = str.indexOf('{', currentIndex);
-                if (openBraceIndex < 0) {
-                    result += str.slice(currentIndex);
-                    break;
-                }
-                else {
-                    result += str.slice(currentIndex, openBraceIndex);
-                    var closeBraceIndex = str.indexOf('}', openBraceIndex);
-                    if (closeBraceIndex < 0) {
-                        // parse error!
-                        console.log("parseActFormat: Parse error: missing close-brace for " + openBraceIndex.toString() + ".");
-                        return "ERROR";
-                    }
-                    else {
-                        var tag = str.slice(openBraceIndex + 1, closeBraceIndex);
-                        if (typeof dictionary[tag] !== 'undefined') {
-                            result += dictionary[tag];
-                        } else {
-                            console.log("parseActFormat: Unknown tag: " + tag);
-                            result += "ERROR";
-                        }
-                        currentIndex = closeBraceIndex + 1;
-                    }
-                }
-            } while (currentIndex < str.length);
-            
-            return result;
-        }
-
-        //かきたし2
-        function hideelements(){
-            var togglebutton = document.getElementById('hide_show');
-            var encounterrr = document.getElementById("encounter");
-            if(togglebutton.getAttribute('src') == "eye_close.png"){//出す処理
-                encounterrr.style.visibility = "visible";
-                togglebutton.setAttribute('src', 'eye_open.png');
-            } else {//隠す処理
-                encounterrr.style.visibility = "hidden";
-                togglebutton.setAttribute('src', 'eye_close.png');
-            }
-        }
-
-        function changecolor(){//黄色->白->水色
-            var encounterrr = document.getElementById("encounter");
-            if(document.getElementById("encounter").style.color == "rgb(255, 255, 255)"){//白
-                document.getElementById("encounter").style.color = "#14C0F2";
-            } else if(document.getElementById("encounter").style.color == "rgb(20, 192, 242)"){//水色
-                document.getElementById("encounter").style.color = "#EBCA1B";
-            } else {//黄色
-                document.getElementById("encounter").style.color = "rgb(255, 255, 255)";
-            }
-        }
-
-    </script>
 </head>
 <body>
     <div id="encounter">
@@ -271,6 +97,119 @@
     <div id="hide_show" onclick="hideelements()">
         <img src="eye_open.png"/>
     </div>
+
+        <script>
+
+        var encounterrr = document.getElementById("encounter");
+
+        // タイマー用関数、タイマーが動いているかどうかのフラグ管理
+        var timeA = 0;
+        var timeB = 0;
+        var textA = '00';
+        var textB = '00';
+        var timeRes = 0;
+        var timeRaw = 0;
+        var currentTime = "00:00";
+        var isTimerActive = false;
+
+        //
+        // 以下表示用スクリプト
+        //
+
+        // LogLine イベントを購読
+        addOverlayListener("LogLine", (e) => update(e));
+        startOverlayEvents();
+
+        // 表示要素の更新
+        function update(data) {
+            if (JSON.stringify(data).search('0039..戦闘開始！') !== -1) {//戦闘開始
+                console.log('戦闘開始！');
+                timeRaw = 0;
+                currentTime = "00:00";
+                isTimerActive = true;
+            } else if (JSON.stringify(data).search('/\|40000010\|/') !== -1) {//ワイプ(1)
+                console.log('タイマー停止');
+                isTimerActive = false;
+            } else if (JSON.stringify(data).search('/\|40000005\|/') !== -1) {//ワイプ(2)
+                console.log('タイマー停止');
+                isTimerActive = false;
+            } else if (JSON.stringify(data).search('/\|40000003\|/') !== -1) {//勝利(?)
+                console.log('タイマー停止');
+                isTimerActive = false;
+            } else if (JSON.stringify(data).search('がレディチェックを開始しました。') !== -1) {//レディチェック
+                console.log('タイマー停止');
+                isTimerActive = false;
+            } else {
+                
+            }
+            
+            //先釣り対策
+            if(isTimerActive == false){
+                if (JSON.stringify(data).search('/\|トマホーク\|/') !== -1){
+                    timeRaw = 0;
+                    currentTime = "00:00";
+                    isTimerActive = true;
+                } else if (JSON.stringify(data).search('/\|アンメンド\|/') !== -1){
+                    timeRaw = 0;
+                    currentTime = "00:00";
+                    isTimerActive = true;
+                } else if (JSON.stringify(data).search('/\|サンダーバレット\|/') !== -1){
+                    timeRaw = 0;
+                    currentTime = "00:00";
+                    isTimerActive = true;
+                }
+            }
+        }
+        function updateTimer(){
+            timeRaw = timeRaw + 0.1;//タイマー+0.1
+            timeRes = Math.floor(timeRaw);//小数点切り捨てた結果をtimeResに
+            timeA = timeRes % 60//秒数を求める
+            timeB = Math.floor(timeRes / 60);//分を求める
+            if(timeA <= 9) {//9以下の場合0+数字にする
+                textA = '0' + timeA;
+            } else {
+                textA = timeA;
+            }
+
+            if(timeB <= 9) {
+                textB = '0' + timeB;
+            } else {
+                textB = timeB;
+            }
+            if(isTimerActive == true) {//タイマーがアクティブな場合のみ更新
+                currentTime = textB + ':' + textA;
+                document.getElementById('encounter').innerText = currentTime;
+            }
+        }
+
+        setInterval(updateTimer, 100);
+
+        function hideelements(){
+            var togglebutton = document.getElementById('hide_show');
+            if(togglebutton.getAttribute('src') == "eye_close.png"){//出す処理
+                encounterrr.style.visibility = "visible";
+                togglebutton.setAttribute('src', 'eye_open.png');
+            } else {//隠す処理
+                encounterrr.style.visibility = "hidden";
+                togglebutton.setAttribute('src', 'eye_close.png');
+            }
+        }
+
+        function changecolor(){//黄色->白->水色
+            var encounterrr = document.getElementById("encounter");
+            if(document.getElementById("encounter").style.color == "rgb(255, 255, 255)"){//白
+                console.log(document.getElementById("encounter").style.color);
+                document.getElementById("encounter").style.color = "#14C0F2";
+            } else if(document.getElementById("encounter").style.color == "rgb(20, 192, 242)"){//水色
+                console.log(document.getElementById("encounter").style.color);
+                document.getElementById("encounter").style.color = "#EBCA1B";
+            } else {//黄色
+                document.getElementById("encounter").style.color = "rgb(255, 255, 255)";
+                console.log(document.getElementById("encounter").style.color);
+            }
+        }
+
+    </script>
 
 </body>
 </html>
