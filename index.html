@@ -137,24 +137,8 @@
             } else {
                 
             }
-            
-            //先釣り対策
-            if(isTimerActive == false){
-                if (JSON.stringify(data).search('/\|トマホーク\|/') !== -1){
-                    timeRaw = 0;
-                    currentTime = "00:00";
-                    isTimerActive = true;
-                } else if (JSON.stringify(data).search('/\|アンメンド\|/') !== -1){
-                    timeRaw = 0;
-                    currentTime = "00:00";
-                    isTimerActive = true;
-                } else if (JSON.stringify(data).search('/\|サンダーバレット\|/') !== -1){
-                    timeRaw = 0;
-                    currentTime = "00:00";
-                    isTimerActive = true;
-                }
-            }
         }
+            
         function updateTimer(){
             timeRaw = timeRaw + 0.1;//タイマー+0.1
             timeRes = Math.floor(timeRaw);//小数点切り捨てた結果をtimeResに
