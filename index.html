@@ -72,6 +72,7 @@
             height:70px;
             width:200px;
             position:relative;
+            visibility:hidden;
         }
 
         /* テーブルヘッダの下線の設定 */
@@ -88,14 +89,14 @@
         00:00
         <!-- ここにエンカウント情報が入る -->
     </div>
-
-    <div id="change_color" onclick="changecolor()">
+        <div id="change_color" onclick="changecolor()">
         <img src="paint_bucket.png"/>
     </div>
     
     <div id="hide_show" onclick="hideelements()">
         <img src="eye_open.png"/>
     </div>
+
 
         <script>
 
@@ -141,8 +142,15 @@
             } else {
                 
             }
+
+            //開始/終了時に自動で可視性を切り替え
+            if (JSON.stringify(data).search('」の攻略を開始した。') !== -1){
+                encounterrr.style.visibility = "visible";
+            } else if (JSON.stringify(data).search('」の攻略を終了した。') !== -1){
+                encounterrr.style.visibility = "hidden";
+            }
         }
-        
+
         function updateTimer(){
             timeRaw = timeRaw + 0.1;//タイマー+0.1
             timeRes = Math.floor(timeRaw);//小数点切り捨てた結果をtimeResに
@@ -169,11 +177,11 @@
 
         function hideelements(){
             var togglebutton = document.getElementById('hide_show');
-            if(togglebutton.getAttribute('src') == "eye_close.png"){//出す処理
-                encounterrr.style.visibility = "visible";
-                togglebutton.setAttribute('src', 'eye_open.png');
-            } else {//隠す処理
+            if(encounterrr.style.visibility == "visible"){//隠す処理
                 encounterrr.style.visibility = "hidden";
+                togglebutton.setAttribute('src', 'eye_open.png');
+            } else {//出す処理
+                encounterrr.style.visibility = "visible";
                 togglebutton.setAttribute('src', 'eye_close.png');
             }
         }
@@ -193,6 +201,7 @@
         }
 
     </script>
+
 
 </body>
 </html>
